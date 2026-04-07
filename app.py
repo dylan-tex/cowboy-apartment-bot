@@ -78,11 +78,49 @@ def get_claude_response(sender_id, user_message):
     return assistant_message
 
 def build_lead_summary(sender_id, history):
-    lines = ["🤠 NEW LEAD — Cowboy Apartment Locators\n"]
+    # Extract key lead info from conversation using Claude
+    convo_text = ""
     for msg in history:
         role = "Customer" if msg["role"] == "user" else "Melissa"
-        lines.append(f"{role}: {msg['content']}")
-    return "\n".join(lines)
+        convo_text += f"{role}: {msg['content']}\n"
+
+    extraction_prompt = f"""From this apartment locator conversation, extract:
+1. Name
+2. Phone number
+3. Property type
+4. Bedrooms/Bathrooms
+5. Area/Location
+6. Budget
+7. Move-in date
+8. Credit situation
+9. Tour availability
+
+Reply in this exact format (one line each, use N/A if missing):
+Name: ...
+Phone: ...
+Type: ...
+Beds/Baths: ...
+Area: ...
+Budget: ...
+Move-in: ...
+Credit: ...
+Tour: ...
+
+Conversation:
+{convo_text}"""
+
+    try:
+        extraction = anthropic_client.messages.create(
+            model="claude-opus-4-5",
+            max_tokens=200,
+            messages=[{"role": "user", "content": extraction_prompt}]
+        )
+        extracted = extraction.content[0].text.strip()
+    except Exception:
+        extracted = convo_text[:800]
+
+    summary = f"NEW LEAD - Cowboy Apartment Locators\n\n{extracted}"
+    return summary[:1500]
 
 @app.route("/webhook", methods=["GET"])
 def verify_webhook():
