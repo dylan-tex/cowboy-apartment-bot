@@ -37,38 +37,38 @@ Rules:
 - Keep messages concise — this is a Facebook Messenger chat, not an email."""
 
 def get_conversation(sender_id):
-      if sender_id not in conversations:
-                conversations[sender_id] = []
-            return conversations[sender_id]
+    if sender_id not in conversations:
+        conversations[sender_id] = []
+    return conversations[sender_id]
 
 def send_facebook_message(recipient_id, message_text):
-      url = "https://graph.facebook.com/v18.0/me/messages"
+    url = "https://graph.facebook.com/v18.0/me/messages"
     params = {"access_token": os.environ["FB_PAGE_ACCESS_TOKEN"]}
     data = {
-              "recipient": {"id": recipient_id},
-              "message": {"text": message_text}
+        "recipient": {"id": recipient_id},
+        "message": {"text": message_text}
     }
     response = requests.post(url, params=params, json=data)
     return response.json()
 
 def send_sms_alert(lead_summary):
-      numbers = ["2107758193", "2109759200"]
+    numbers = ["2107758193", "2109759200"]
     for number in numbers:
-              twilio_client.messages.create(
-                            body=lead_summary,
-                            from_=os.environ["TWILIO_PHONE_NUMBER"],
-                            to=f"+1{number}"
-              )
+        twilio_client.messages.create(
+            body=lead_summary,
+            from_=os.environ["TWILIO_PHONE_NUMBER"],
+            to=f"+1{number}"
+        )
 
 def get_claude_response(sender_id, user_message):
-      history = get_conversation(sender_id)
+    history = get_conversation(sender_id)
     history.append({"role": "user", "content": user_message})
 
     response = anthropic_client.messages.create(
-              model="claude-opus-4-5",
-              max_tokens=500,
-              system=SYSTEM_PROMPT,
-              messages=history
+        model="claude-opus-4-5",
+        max_tokens=500,
+        system=SYSTEM_PROMPT,
+        messages=history
     )
 
     assistant_message = response.content[0].text
@@ -78,48 +78,48 @@ def get_claude_response(sender_id, user_message):
     return assistant_message
 
 def build_lead_summary(sender_id, history):
-      lines = ["🤠 NEW LEAD — Cowboy Apartment Locators\n"]
+    lines = ["🤠 NEW LEAD — Cowboy Apartment Locators\n"]
     for msg in history:
-              role = "Customer" if msg["role"] == "user" else "Melissa"
-              lines.append(f"{role}: {msg['content']}")
-          return "\n".join(lines)
+        role = "Customer" if msg["role"] == "user" else "Melissa"
+        lines.append(f"{role}: {msg['content']}")
+    return "\n".join(lines)
 
 @app.route("/webhook", methods=["GET"])
 def verify_webhook():
-      mode = request.args.get("hub.mode")
+    mode = request.args.get("hub.mode")
     token = request.args.get("hub.verify_token")
     challenge = request.args.get("hub.challenge")
 
     if mode == "subscribe" and token == os.environ["WEBHOOK_VERIFY_TOKEN"]:
-              return challenge, 200
-          return "Forbidden", 403
+        return challenge, 200
+    return "Forbidden", 403
 
 @app.route("/webhook", methods=["POST"])
 def handle_webhook():
-      data = request.get_json()
+    data = request.get_json()
 
     if data.get("object") == "page":
-              for entry in data.get("entry", []):
-                            for event in entry.get("messaging", []):
-                                              sender_id = event["sender"]["id"]
+        for entry in data.get("entry", []):
+            for event in entry.get("messaging", []):
+                sender_id = event["sender"]["id"]
 
-                                if "message" in event and "text" in event["message"]:
-                                                      user_text = event["message"]["text"]
+                if "message" in event and "text" in event["message"]:
+                    user_text = event["message"]["text"]
 
-                                    reply = get_claude_response(sender_id, user_text)
+                    reply = get_claude_response(sender_id, user_text)
 
-                          if "##LEAD_COMPLETE##" in reply:
-                                                    clean_reply = reply.replace("##LEAD_COMPLETE##", "").strip()
-                                                    send_facebook_message(sender_id, clean_reply)
+                    if "##LEAD_COMPLETE##" in reply:
+                        clean_reply = reply.replace("##LEAD_COMPLETE##", "").strip()
+                        send_facebook_message(sender_id, clean_reply)
 
                         history = get_conversation(sender_id)
                         summary = build_lead_summary(sender_id, history)
                         send_sms_alert(summary)
-else:
+                    else:
                         send_facebook_message(sender_id, reply)
 
     return jsonify({"status": "ok"}), 200
 
 if __name__ == "__main__":
-      port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
