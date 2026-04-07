@@ -11,7 +11,7 @@ app = Flask(__name__)
 anthropic_client = anthropic.Anthropic(api_key=os.environ["CLAUDE_API_KEY"])
 twilio_client = Client(os.environ["TWILIO_ACCOUNT_SID"], os.environ["TWILIO_AUTH_TOKEN"])
 
-# In-memory conversation store
+# In-memory conversation stor
 conversations = {}
 
 SYSTEM_PROMPT = """You are Melissa, a friendly and warm apartment locator assistant for Cowboy Apartment Locators. Your personality is inviting, upbeat, and customer-service focused — like a helpful friend in the real estate world.
@@ -78,12 +78,25 @@ def get_claude_response(sender_id, user_message):
     return assistant_message
 
 def build_lead_summary(sender_id, history):
-    lines = ["🤠 NEW LEAD — Cowboy Apartment Locators\n"]
-    for msg in history:
-        role = "Customer" if msg["role"] == "user" else "Melissa"
-        lines.append(f"{role}: {msg['content']}")
-    return "\n".join(lines)
+    # Use Claude to extract structured lead info from the conversation
+    try:
+        conversation_text = ""
+        for msg in history:
+            role = "Customer" if msg["role"] == "user" else "Melissa"
+            conversation_text += f"{role}: {msg['content']}\n"
 
+        extraction_response = anthropic_client.messages.create(
+            model="claude-opus-4-5",
+            max_tokens=300,
+            system="Extract lead info from this apartment locator conversation. Return ONLY this format with no extra text:\nName: [name or Unknown]\nPhone: [phone or Not provided]\nType: [apartment/house/condo/etc]\nBeds/Baths: [X bd/X ba]\nArea: [location]\nBudget: [$ amount]\nMove-in: [date]\nCredit: [excellent/good/fair/poor]\nTour: [availability]",
+            messages=[{"role": "user", "content": conversation_text}]
+        )
+        lead_info = extraction_response.content[0].text.strip()
+    except Exception:
+        lead_info = "Could not extract lead details."
+
+    summary = "🤠 NEW LEAD - Cowboy Apartment Locators\n\n" + lead_info
+    return summary[:1500]
 @app.route("/webhook", methods=["GET"])
 def verify_webhook():
     mode = request.args.get("hub.mode")
