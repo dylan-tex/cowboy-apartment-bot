@@ -63,7 +63,7 @@ def send_sms_alert(lead_summary):
                 )
 
 def send_email_alert(lead_summary):
-        emails = ["dylansilver3@gmail.com"]
+        emails = ["dylansilver3@gmail.com", "matthew.gies@live.com"]
     msg = MIMEText(lead_summary)
     msg["Subject"] = "New Lead - Cowboy Apartment Locators"
     msg["From"] = os.environ["EMAIL_ADDRESS"]
