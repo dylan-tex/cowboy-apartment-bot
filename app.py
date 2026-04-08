@@ -63,7 +63,7 @@ def send_email_alert(lead_summary):
         print("Email error:", e)
 
 
-def send_alerts_background(summary)
+def send_alerts_background(summary):
     send_sms_alert(summary)
     send_email_alert(summary)
 
