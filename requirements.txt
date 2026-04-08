@@ -4,3 +4,5 @@ twilio==8.10.0
 requests==2.31.0
 gunicorn==21.2.0
 httpx==0.27.2
+
+sendgrid==6.11.0
