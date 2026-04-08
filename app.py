@@ -118,7 +118,7 @@ Conversation:
 def send_facebook_message(recipient_id, message_text):
     url = f"https://graph.facebook.com/v18.0/me/messages"
     headers = {"Content-Type": "application/json"}
-    params = {"access_token": os.environ["PAGE_ACCESS_TOKEN"]}
+    params = {"access_token": os.environ["FB_PAGE_ACCESS_TOKEN"]}
     data = {
         "recipient": {"id": recipient_id},
         "message": {"text": message_text}
@@ -145,7 +145,7 @@ def verify_webhook():
     token = request.args.get("hub.verify_token")
     challenge = request.args.get("hub.challenge")
 
-    if mode == "subscribe" and token == os.environ["VERIFY_TOKEN"]:
+    if mode == "subscribe" and token == os.environ["WEBHOOK_VERIFY_TOKEN"]:
         return challenge, 200
     return "Forbidden", 403
 
