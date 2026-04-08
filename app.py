@@ -99,8 +99,7 @@ Conversation:
         messages_text = ""
         for msg in conversation_history:
             role = "Customer" if msg["role"] == "user" else "Melissa"
-            messages_text += f"{role}: {msg['content']}
-"
+            messages_text += role + ": " + msg["content"] + "\n"
 
         response = anthropic_client.messages.create(
             model="claude-opus-4-5",
