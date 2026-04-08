@@ -63,7 +63,7 @@ def send_email_alert(lead_summary):
         print("Email error:", e)
 
 
-def send_alerts_background(summary):
+def send_alerts_background(summary)
     send_sms_alert(summary)
     send_email_alert(summary)
 
@@ -76,7 +76,7 @@ def build_lead_summary(messages):
             content = msg.get("content", "")
             messages_text += role + ": " + content + "\n"
         response = anthropic_client.messages.create(
-            model="claude-3-haiku-20240307",
+            model="claude-3-5-haiku-20241022",
             max_tokens=500,
             messages=[{
                 "role": "user",
