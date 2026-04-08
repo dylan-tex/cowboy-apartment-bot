@@ -76,7 +76,7 @@ def build_lead_summary(messages):
             content = msg.get("content", "")
             messages_text += role + ": " + content + "\n"
         response = anthropic_client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model="claude-haiku-4-5",
             max_tokens=500,
             messages=[{
                 "role": "user",
@@ -113,7 +113,7 @@ def send_facebook_message(recipient_id, message_text):
 def get_claude_response(conversation_history):
     try:
         response = anthropic_client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model="claude-haiku-4-5",
             max_tokens=1000,
             system=SYSTEM_PROMPT,
             messages=conversation_history
