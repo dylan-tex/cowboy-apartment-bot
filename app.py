@@ -113,7 +113,7 @@ def send_facebook_message(recipient_id, message_text):
 def get_claude_response(conversation_history):
     try:
         response = anthropic_client.messages.create(
-            model="claude-3-haiku-20240307",
+            model="claude-3-5-haiku-20241022",
             max_tokens=1000,
             system=SYSTEM_PROMPT,
             messages=conversation_history
