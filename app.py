@@ -50,7 +50,7 @@ def send_sms_alert(lead_summary):
 def send_email_alert(lead_summary):
     try:
         sg = sendgrid.SendGridAPIClient(api_key=os.environ["SENDGRID_API_KEY"])
-        emails = ["dylansilver3@gmail.com", "matthew.gies@live.com"]
+        emails = ["dylansilver.tx@gmail.com", "matt@mattknowstexas.com"]
         for recipient in emails:
             message = Mail(
                 from_email=os.environ.get("EMAIL_ADDRESS", "advertising@dylansilver.org"),
