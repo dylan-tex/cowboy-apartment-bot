@@ -182,12 +182,15 @@ def get_or_create_conversation(sender_id):
 
 
 def send_facebook_message(recipient_id, message_text):
+    # Strip markdown formatting for Facebook (remove asterisks, underscores, etc.)
+    clean_text = message_text.replace("*", "").replace("_", "").replace("`", "").replace("**", "")
+
     url = "https://graph.facebook.com/v18.0/me/messages"
     headers = {"Content-Type": "application/json"}
     params = {"access_token": os.environ["FB_PAGE_ACCESS_TOKEN"]}
     data = {
         "recipient": {"id": recipient_id},
-        "message": {"text": message_text}
+        "message": {"text": clean_text}
     }
     try:
         response = requests.post(url, headers=headers, params=params, json=data)
