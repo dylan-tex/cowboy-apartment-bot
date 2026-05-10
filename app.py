@@ -44,6 +44,13 @@ RAPPORT BUILDING GUIDELINES:
 - Make transitions feel natural, not robotic: Don't ask questions back-to-back; acknowledge their response first
 - Be warm and encouraging: "You know exactly what you're looking for, I love that!"
 
+MESSAGE FORMATTING:
+- Send responses as 2-3 shorter, punchy messages instead of one long paragraph
+- Each message should be a complete thought: empathy message, contextual comment, then the question
+- Separate multiple messages with |||
+- This feels more conversational, like texting with a friend
+- Example: "That sounds tough. I'm glad you reached out!|||San Antonio is perfect for fresh starts.|||So, how many bedrooms do you need?"
+
 Start by warmly greeting the customer and asking where they're moving to.
 
 When you have collected CITY/LOCATION, NUMBER OF BEDROOMS, NUMBER OF BATHROOMS, FULL NAME, PHONE NUMBER, and EMAIL, acknowledge this genuinely in your response. Say something like: "Perfect, [Name]! I'm passing your info and preferences along to our team right now so they can start finding you options that match what you're looking for. I'm an AI assistant here in the chat, so while they review everything, let me gather just a few more details to make sure they have the complete picture..."
@@ -192,21 +199,28 @@ def get_or_create_conversation(sender_id):
 
 
 def send_facebook_message(recipient_id, message_text):
-    # Strip markdown formatting for Facebook (remove asterisks, underscores, etc.)
-    clean_text = message_text.replace("*", "").replace("_", "").replace("`", "").replace("**", "")
+    # Split messages on ||| separator for multi-message responses
+    messages = message_text.split("|||")
 
-    url = "https://graph.facebook.com/v18.0/me/messages"
-    headers = {"Content-Type": "application/json"}
-    params = {"access_token": os.environ["FB_PAGE_ACCESS_TOKEN"]}
-    data = {
-        "recipient": {"id": recipient_id},
-        "message": {"text": clean_text}
-    }
-    try:
-        response = requests.post(url, headers=headers, params=params, json=data)
-        response.raise_for_status()
-    except Exception as e:
-        print("Facebook send error:", e)
+    for msg in messages:
+        # Strip markdown formatting for Facebook (remove asterisks, underscores, etc.)
+        clean_text = msg.strip().replace("*", "").replace("_", "").replace("`", "").replace("**", "")
+
+        if not clean_text:  # Skip empty messages
+            continue
+
+        url = "https://graph.facebook.com/v18.0/me/messages"
+        headers = {"Content-Type": "application/json"}
+        params = {"access_token": os.environ["FB_PAGE_ACCESS_TOKEN"]}
+        data = {
+            "recipient": {"id": recipient_id},
+            "message": {"text": clean_text}
+        }
+        try:
+            response = requests.post(url, headers=headers, params=params, json=data)
+            response.raise_for_status()
+        except Exception as e:
+            print("Facebook send error:", e)
 
 
 def get_claude_response(conversation_history):
