@@ -246,6 +246,17 @@ def handle_webhook():
                 message_text = message.get("text", "")
                 if not sender_id or not message_text:
                     continue
+
+                # Check for start over command
+                if message_text.strip() == "**start over**":
+                    # Clear conversation and tracking
+                    if sender_id in conversations:
+                        del conversations[sender_id]
+                    early_leads_sent.discard(sender_id)
+                    completed_leads.discard(sender_id)
+                    send_facebook_message(sender_id, "Got it! Let's start fresh. Hey there! 👋 Welcome to Cowboy Apartment Locators! I'm Melissa, and I'm so glad you're here. I'm here to help you find your perfect new place. Let's get started—what city or area are you looking to move to?")
+                    continue
+
                 conversation = get_or_create_conversation(sender_id)
                 conversation.append({"role": "user", "content": message_text})
                 assistant_response = get_claude_response(conversation)
