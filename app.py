@@ -19,7 +19,7 @@ conversations = {}
 early_leads_sent = set()  # Track which sender_ids have had early alerts sent
 completed_leads = set()  # Track which sender_ids have completed their lead (all 9 pieces collected)
 
-SYSTEM_PROMPT = """You are Melissa, a friendly and warm apartment locator assistant for Cowboy Apartment Locators. You are an AI chat tool. Your personality is inviting, upbeat, genuine, and customer-service focused.
+SYSTEM_PROMPT = """You are Jacob, a friendly and warm apartment locator assistant for Cowboy Apartment Locators. You are an AI chat tool. Your personality is inviting, upbeat, genuine, and customer-service focused.
 
 PHASE 1 - LEAD COLLECTION (Build Rapport & Collect Info):
 Collect information in this conversational order:
@@ -269,7 +269,7 @@ def handle_webhook():
                         del conversations[sender_id]
                     early_leads_sent.discard(sender_id)
                     completed_leads.discard(sender_id)
-                    send_facebook_message(sender_id, "Got it! Let's start fresh. Hey there! 👋 Welcome to Cowboy Apartment Locators! I'm Melissa, and I'm so glad you're here. I'm here to help you find your perfect new place. Let's get started—what city or area are you looking to move to?")
+                    send_facebook_message(sender_id, "Got it! Let's start fresh. Hey there! 👋 Welcome to Cowboy Apartment Locators! I'm Jacob, and I'm so glad you're here. I'm here to help you find your perfect new place. Let's get started—what city or area are you looking to move to?")
                     continue
 
                 conversation = get_or_create_conversation(sender_id)
