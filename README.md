@@ -1,6 +1,6 @@
 # Cowboy Apartment Bot
 
-A Flask webhook service for Cowboy Apartment Locators' Facebook Messenger assistant, Melissa. It uses Claude to collect apartment-search preferences and contact information, replies through the Facebook Graph API, and sends lead notifications through SendGrid and Twilio.
+A Flask webhook service for Cowboy Apartment Locators' Facebook Messenger assistant, Jacob. It uses Claude to collect apartment-search preferences and contact information, replies through the Facebook Graph API, and sends lead notifications through SendGrid and Twilio.
 
 ## How it works
 
